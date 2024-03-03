@@ -1,0 +1,214 @@
+<html>
+<head>
+    <meta charset="utf-8" />
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>Docker容器迁移 | YuXin</title>
+
+<link rel="shortcut icon" href="https://uniqueww.github.io/favicon.ico?v=1709471257308">
+
+<link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://uniqueww.github.io/styles/main.css">
+<!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"> -->
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets/highlight.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages/dockerfile.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/highlight.js/9.12.0/languages//dart.min.js"></script>
+
+<!-- <script src="https://cdn.jsdelivr.net/npm/moment@2.27.0/moment.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/js/bootstrap.min.js"></script> -->
+<!-- DEMO JS -->
+<!--<script src="media/scripts/index.js"></script>-->
+
+
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.12.0/dist/katex.css">
+    
+        <script src="https://cdn.jsdelivr.net/npm/mermaid@9.1.1/dist/mermaid.min.js"></script>
+        <script>mermaid.initialize({startOnLoad:true});</script> 
+    
+</head>
+<body>
+<div class="main gt-bg-theme-color-first">
+    <nav class="navbar navbar-expand-lg">
+    <a class="navbar-brand" href="/">
+        <img class="user-avatar" src="/images/avatar.png" alt="头像">
+        <div class="site-name gt-c-content-color-first">
+            YuXin
+        </div>
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" id="changeNavbar">
+        <i class="fas fa-bars gt-c-content-color-first" style="font-size: 18px"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="navbar-nav mr-auto" style="text-align: center">
+            
+            <div class="nav-item">
+                
+                <a href="/" class="menu gt-a-link">
+                    首页
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/archives" class="menu gt-a-link">
+                    归档
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/tags" class="menu gt-a-link">
+                    标签
+                </a>
+                
+            </div>
+            
+            <div class="nav-item">
+                
+                <a href="/post/about" class="menu gt-a-link">
+                    关于
+                </a>
+                
+            </div>
+            
+        </div>
+        <div style="text-align: center">
+            <form id="gridea-search-form" style="position: relative" data-update="1709471257308"
+                action="/search/">
+                <input class="search-input" autocomplete="off" spellcheck="false" name="q" placeholder="搜索文章" />
+                <i class="fas fa-search gt-c-content-color-first" style="position: absolute; top: 9px; left: 10px;"></i>
+            </form>
+        </div>
+    </div>
+</nav>
+<script>
+    /* 移动端导航栏展开/收起切换 */
+    document.getElementById('changeNavbar').onclick = () => {
+        var element = document.getElementById('navbarSupportedContent');
+        if (element.style.display === 'none' || element.style.display === '') {
+            element.style.display = 'block';
+        } else {
+            element.style.display = 'none';
+        }
+    }
+</script>
+
+    <div class="post-container">
+        <div class="post-detail gt-bg-theme-color-second">
+            <article class="gt-post-content">
+                <h2 class="post-title">
+                    Docker容器迁移
+                </h2>
+                <div class="post-info">
+                    <time class="post-time gt-c-content-color-first">
+                        · 2024-03-03 ·
+                    </time>
+                    
+                        <a href="https://uniqueww.github.io/tag/MFnvjmKeT/" class="post-tags">
+                            # Docker
+                        </a>
+                    
+                </div>
+                <div class="post-content">
+                    <p>一次Docker容器迁移教学记录</p>
+<!-- more -->
+<p>笔者本人之前使用的腾讯云的轻量云服务器，使用期限为一年，大部分的服务都是以Docker容器的方式，跑在这个服务器上的。中途偶然白嫖阿里轻量云十年的使用期限🫣，所以就有了这篇Docke容器迁移的教程，希望能给有类似需求的朋友一点借鉴。</p>
+<h5 id="一-打包容器">一、打包容器</h5>
+<p>首先需要将要迁移的容器打包，可以通过docker ps 命令查看目前运行的docker 容器</p>
+<pre><code class="language-bat">#查看正在运行的容器
+docker ps 
+#导出容器为gz文件 下面的命令需要替换container-name为自己的容器名称
+docker export container-name gzip container-name.gz
+</code></pre>
+<p>当我们完成上面操作的时候将会在当前文件夹下得到一个container-name.gz的文件，这个文件就是打包好的容器</p>
+<h5 id="二-传输容器">二、传输容器</h5>
+<p>接下来我们就需要转移容器，转移容器有一下几种方法：</p>
+<ol>
+<li>
+<p>使用scp命令，就是secure copy，是用来进行远程文件拷贝的 <strong>需要两台主机能互通网络</strong></p>
+<p>优点：不耗费本地流量</p>
+<p>使用方法：</p>
+<pre><code class="language-bat">#scp [参数] &lt;源地址（用户名@IP地址或主机名）&gt;:&lt;文件路径&gt; &lt;目的地址（用户名 @IP 地址或主机名）&gt;:&lt;文件路径&gt; 
+scp container-name.gz root@1.1.1.1:/docker
+</code></pre>
+</li>
+<li>
+<p>使用wget命令，<strong>当两台主机不能直接网络互通</strong> 可以通过本机作为跳板机 来下载和导入文件。wget主要用于下载文件，上传文件需要结合scp命令使用</p>
+<p>使用方法：</p>
+<pre><code class="language-bat">#wget 用户名@IP地址或主机名:&lt;文件路径&gt;
+#将container-name.gz文件下载至本地
+wget root@2.2.2.2:/path/container-name.gz
+#使用scp将文件从本机复制到目标主机
+scp container-name.gz root@1.1.1.1:/docker
+</code></pre>
+</li>
+</ol>
+<h5 id="三-导入容器">三、导入容器</h5>
+<p>将上传好的容器导入就能实现容器的迁移</p>
+<pre><code class="language-bat">#docker import &lt;导出的文件名&gt;.gz &lt;新容器名称&gt;
+docker import container-name.gz container-name
+#运行容器
+docker run -p 80:80 container-name
+</code></pre>
+
+                </div>
+            </article>
+        </div>
+
+        
+            <div class="next-post">
+                <div class="next gt-c-content-color-first">下一篇</div>
+                <a href="https://uniqueww.github.io/post/spring面试题/" class="post-title gt-a-link">
+                    Spring面试题
+                </a>
+            </div>
+        
+
+        
+
+        
+
+        
+
+        <div class="site-footer gt-c-content-color-first">
+    <div class="slogan gt-c-content-color-first">温故而知新</div>
+    <div class="social-container">
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+            
+        
+    </div>
+    <div class="footer-info">
+        Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a>
+    </div>
+    <div>
+        Theme <a href="https://github.com/imhanjie/gridea-theme-pure" target="_blank">Pure</a>, Powered by <a
+                href="https://gridea.dev" target="_blank">Gridea</a> | <a href="https://uniqueww.github.io/atom.xml" target="_blank">RSS</a>
+    </div>
+</div>
+
+<script>
+  hljs.highlightAll()
+</script>
+
+    </div>
+</div>
+</body>
+</html>
